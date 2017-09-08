@@ -1,150 +1,128 @@
-if has('vim_starting')
-	"初回起動時のみruntimepathにneobundleのパスを指定する
-	set runtimepath+=~/.vim/bundle/neobundle.vim/
-endif
+" Vundle
 
-"NeoBundleを初期化
-call neobundle#begin(expand('~/.vim/bundle/'))
+set nocompatible               " be iMproved
+filetype off                   " required!
+set rtp+=~/.vim/bundle/vundle/
+call vundle#rc()
+" let Vundle manage Vundle
+" required!
+Bundle 'gmarik/vundle'
+" My Bundles here:
+"
+" original repos on github
+Bundle 'tpope/vim-fugitive'
+Bundle 'Lokaltog/vim-easymotion'
+Bundle 'rstacruz/sparkup', {'rtp': 'vim/'}
+Bundle 'tpope/vim-rails.git'
+" vim-scripts repos
+Bundle 'L9'
+Bundle 'FuzzyFinder'
+Bundle 'basyura/TweetVim'
+Bundle 'mattn/webapi-vim'
+Bundle 'basyura/twibill.vim'
+Bundle 'tyru/open-browser.vim'
+Bundle 'h1mesuke/unite-outline'
+Bundle 'basyura/bitly.vim'
+Bundle 'Shougo/unite.vim'
+" non github repos
+Bundle 'git://git.wincent.com/command-t.git'
+" ...
+filetype plugin indent on     " required!
+"
+" Brief help
+" :BundleList          - list configured bundles
+" :BundleInstall(!)    - install(update) bundles
+" :BundleSearch(!) foo - search(or refresh cache first) for foo
+" :BundleClean(!)      - confirm(or auto-approve) removal of unused bundles
+"
+" see :h vundle for more details or wiki for FAQ
+" NOTE: comments after Bundle command are not allowed..
 
-"Required:
-NeoBundleFetch 'Shougo/neobundle.vim'
+"-----------
+" tweetvim
+"-----------
+let mapleader = "\<Space>"
+nnoremap <silent><Leader>tw :<C-u>tabnew <Bar> TweetVimHomeTimeline<CR>
+nnoremap <silent><Leader>tl :<C-u>TweetVimHomeTimeline<CR>
+nnoremap <silent><Leader>tm :<C-u>TweetVimMentions<CR>
+nnoremap <silent><Leader>ty :<C-u>tabnew <Bar>TweetVimSearch suhgde<CR>
+nnoremap <Leader>ts :<C-u>TweetVimSay<CR>
+let g:tweetvim_display_icon = 1
+let g:tweetvim_tweet_per_page = 60
 
-"自動補完
-NeoBundle 'tpope/vim-endwise'
+augroup TweetVimSetting
+  autocmd!
+  " マッピング
+  "     " 挿入・通常モードでsayバッファを閉じる
+  autocmd FileType tweetvim_say nnoremap <buffer><silent><C-g>         :<C-u>q!<CR>
+  autocmd FileType tweetvim_say inoremap <buffer><silent><C-g><C-o>    :<C-u>q!<CR><Esc>
+  " 各種アクション
+  autocmd FileType tweetvim     nnoremap <buffer>s                :<C-u>TweetVimSay<CR>
+  autocmd FileType tweetvim     nnoremap <buffer>m                :<C-u>TweetVimMentions<CR>
+  autocmd FileType tweetvim     nmap     <buffer>c                <Plug>(tweetvim_action_in_reply_to)
+  autocmd FileType tweetvim     nnoremap <buffer>t                :<C-u>Unite tweetvim -no-start-insert -quick-match<CR>
+  autocmd FileType tweetvim     nmap     <buffer><Leader>F        <Plug>(tweetvim_action_remove_favorite)
+  autocmd FileType tweetvim nmap <buffer><Leader>d <Plug>(tweetvim_action_remove_status)
+  " リロード
+  autocmd FileType tweetvim nmap <buffer><Tab> <Plug>(tweetvim_action_reload)
+  " ページの先頭に戻ったらリロード
+  autocmd FileType tweetvim nmap <buffer><silent>gg gg<Plug>(tweetvim_action_reload)
+  " ページ移動をff/bb からf/bに
+  autocmd FileType tweetvim     nmap     <buffer>f                <Plug>(tweetvim_action_page_next)
+  autocmd FileType tweetvim nmap <buffer>b <Plug>(tweetvim_action_page_previous)
+  " favstarやweb UIで表示
+  autocmd FileType tweetvim nnoremap <buffer><Leader><Leader> :<C-u>call <SID>tweetvim_favstar()<CR>
+  " ブラウザで対象ユーザーのホームを開く
+  autocmd FileType tweetvim nnoremap <buffer><Leader>u :<C-u>call <SID>tweetvim_open_home()<CR>
+  " 不要なマップを除去
+  autocmd FileType tweetvim     nunmap   <buffer>ff
+  autocmd FileType tweetvim nunmap <buffer>bb
+augroup END
 
-"ruby構文チェック
-NeoBundle 'scrooloose/syntastic.git'
-
-"シンタックスチェック
-NeoBundle 'scrooloose/syntastic'
-
-"ファイルオープンを便利に
-NeoBundle 'Shougo/unite.vim'
-
-"Unite.vimで最近使ったファイルを表示できるようにする
-NeoBundle 'Shougo/neomru.vim'
-
-call neobundle#end()
-
-" マウスを有効にする
-if has('mouse')
-	set mouse=a
-endif
-
-"キーバインド
-inoremap <C-a>  <Home>
-inoremap <C-e>  <End>
-inoremap <C-b>  <Left>
-inoremap <C-f>  <Right>
-inoremap <C-n>  <Down>
-inoremap <C-p>  <UP>
-inoremap <C-d>  <Del>
-inoremap <C-h>  <BS>
-inoremap <silent> <C-h> <C-g>u<C-h>
-inoremap <C-k> <ESC>d$i
-
-nnoremap ; :
-vnoremap ; :
-nnoremap : ;
-vnoremap : ;
-
+syntax enable
+set number
+set ruler
+set incsearch
+set hlsearch
+set nowrap
+set showmatch
+set whichwrap=h,l
+set nowrapscan
+set ignorecase
+set smartcase
+set hidden
+set history=2000
+set autoindent
+set expandtab
+set tabstop=2
+set shiftwidth=2
+set helplang=en
+set backspace=indent,eol,start
+nnoremap ;  :
+nnoremap :  ;
+vnoremap ;  :
+vnoremap :  ;
+noremap!  
+"" 消去、編集
+imap <C-k> <ESC>d$i
+imap <C-y> <ESC>pi
+imap <C-d> <ESC>xi
+"" 移動
 noremap <Space>h ^
 noremap <Space>l $
-" 不可視文字の表示記号指定
-set listchars=tab:>-,eol:↲,extends:❯,precedes:❮
-set statusline=%<[%n]%m%r%h%w%{'['.(&fenc!=''?&fenc:&enc).':'.&ff.']'}%y\ %F%=%l,%c%V%8P
 
-set backspace=indent,eol,start " Backspaceキーの影響範囲に制限を設けない
+imap <C-a>  <Home>
+imap <C-e>  <End>
+imap <C-b>  <Left>
+imap <C-f>  <Right>
+imap <C-n>  <Down>
+imap <C-p>  <UP>
+
+" 空白文字の表示
+set list
+set listchars=tab:>.,trail:_,extends:>,precedes:<,nbsp:%
+
 set whichwrap=b,s,h,l,<,>,[,]  " 行頭行末の左右移動で行をまたぐ
 set scrolloff=8                " 上下8行の視界を確保
 set sidescrolloff=16           " 左右スクロール時の視界を確保
 set sidescroll=1               " 左右スクロールは一文字づつ行う
-
-"文字エンコーディング
-set encoding=utf-8
-if has('win32') || has('win64')
-	set termencoding=cp932
-else
-	set termencoding=utf-8
-endif
-set fileencoding=utf-8
-
-"全角スペースを表示
-function! ZenkakuSpace()
-	highlight ZenkakuSpace cterm=underline ctermfg=darkgrey gui=underline guifg=darkgrey
-	silent! match ZenkakuSpace /　/
-endfunction
-
-if has('syntax')
-	augroup ZenkakuSpace
-		autocmd!
-		autocmd VimEnter,BufEnter * call ZenkakuSpace()
-	augroup END
-endif
-
-"自動文字数カウント
-augroup WordCount
-    autocmd!
-    autocmd BufWinEnter,InsertLeave,CursorHold * call WordCount('char')
-augroup END
-
-let s:WordCountStr = ''
-let s:WordCountDict = {'word': 2, 'char': 3, 'byte': 4}
-
-function! WordCount(...)
-    if a:0 == 0
-        return s:WordCountStr
-    endif
-    let cidx = 3
-    silent! let cidx = s:WordCountDict[a:1]
-    let s:WordCountStr = ''
-    let s:saved_status = v:statusmsg
-    exec "silent normal! g\<c-g>"
-    if v:statusmsg !~ '^--'
-        let str = ''
-        silent! let str = split(v:statusmsg, ';')[cidx]
-        let cur = str2nr(matchstr(str, '\d\+'))
-        let end = str2nr(matchstr(str, '\d\+\s*$'))
-        if a:1 == 'char'
-            " ここで(改行コード数*改行コードサイズ)を'g<C-g>'の文字数から引く
-            let cr = &ff == 'dos' ? 2 : 1
-            let cur -= cr * (line('.') - 1)
-            let end -= cr * line('$')
-        endif
-        let s:WordCountStr = printf('%d/%d', cur, end)
-    endif
-    let v:statusmsg = s:saved_status
-    return s:WordCountStr
-endfunction
-
-syntax on
-set number
-set title
-set backspace=indent,eol,start
-set clipboard=unnamed,autoselect
-
-" ファイル処理関連の設定
-set noswapfile
-set autoread
-set nobackup
-
-" 検索/置換
-set hlsearch
-set incsearch
-set ignorecase
-set smartcase
-set wrapscan
-set gdefault
-
-" タブ/インデント
-set expandtab     " タブ入力を複数の空白入力に置き換える
-set tabstop=2     " 画面上でタブ文字が占める幅
-set shiftwidth=2  " 自動インデントでずれる幅
-set softtabstop=2 " 連続した空白に対してタブキーやバックスペースキーでカーソルが動く幅
-set autoindent    " 改行時に前の行のインデントを継続する
-set smartindent   " 改行時に入力された行の末尾に合わせて次の行のインデントを増減する
-set noeol   "最終行に改行をいれない
-
-
-filetype plugin on
-filetype indent on
