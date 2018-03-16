@@ -1,128 +1,398 @@
-" Vundle
+""""""""""""""""""""""""""""""""
+" .vimrc
+""""""""""""""""""""""""""""""""
+""""""""""""""""""""""""""""""""
+" vim の基本的な設定 はじめ
+""""""""""""""""""""""""""""""""
+function! s:SID_PREFIX()
+  return matchstr(expand('<sfile>'), '<SNR>\d\+_\zeSID_PREFIX$')
+endfunction
 
-set nocompatible               " be iMproved
-filetype off                   " required!
-set rtp+=~/.vim/bundle/vundle/
-call vundle#rc()
-" let Vundle manage Vundle
-" required!
-Bundle 'gmarik/vundle'
-" My Bundles here:
-"
-" original repos on github
-Bundle 'tpope/vim-fugitive'
-Bundle 'Lokaltog/vim-easymotion'
-Bundle 'rstacruz/sparkup', {'rtp': 'vim/'}
-Bundle 'tpope/vim-rails.git'
-" vim-scripts repos
-Bundle 'L9'
-Bundle 'FuzzyFinder'
-Bundle 'basyura/TweetVim'
-Bundle 'mattn/webapi-vim'
-Bundle 'basyura/twibill.vim'
-Bundle 'tyru/open-browser.vim'
-Bundle 'h1mesuke/unite-outline'
-Bundle 'basyura/bitly.vim'
-Bundle 'Shougo/unite.vim'
-" non github repos
-Bundle 'git://git.wincent.com/command-t.git'
-" ...
-filetype plugin indent on     " required!
-"
-" Brief help
-" :BundleList          - list configured bundles
-" :BundleInstall(!)    - install(update) bundles
-" :BundleSearch(!) foo - search(or refresh cache first) for foo
-" :BundleClean(!)      - confirm(or auto-approve) removal of unused bundles
-"
-" see :h vundle for more details or wiki for FAQ
-" NOTE: comments after Bundle command are not allowed..
+" tab の設定
+function! s:my_tabline()  "{{{
+	let s = ''
+	for i in range(1, tabpagenr('$'))
+		let bufnrs = tabpagebuflist(i)
+		let bufnr = bufnrs[tabpagewinnr(i) - 1]  " first window, first appears
+		let no = i  " display 0-origin tabpagenr.
+		let mod = getbufvar(bufnr, '&modified') ? '!' : ' '
+		let title = fnamemodify(bufname(bufnr), ':t')
+		let title = '[' . title . ']'
+		let s .= '%'.i.'T'
+		let s .= '%#' . (i == tabpagenr() ? 'TabLineSel' : 'TabLine') . '#'
+		let s .= no . ':' . title
+		let s .= mod
+		let s .= '%#TabLineFill# '
+	endfor
+	let s .= '%#TabLineFill#%T%=%#TabLine#'
+	return s
+endfunction "}}}
 
-"-----------
-" tweetvim
-"-----------
-let mapleader = "\<Space>"
-nnoremap <silent><Leader>tw :<C-u>tabnew <Bar> TweetVimHomeTimeline<CR>
-nnoremap <silent><Leader>tl :<C-u>TweetVimHomeTimeline<CR>
-nnoremap <silent><Leader>tm :<C-u>TweetVimMentions<CR>
-nnoremap <silent><Leader>ty :<C-u>tabnew <Bar>TweetVimSearch suhgde<CR>
-nnoremap <Leader>ts :<C-u>TweetVimSay<CR>
-let g:tweetvim_display_icon = 1
-let g:tweetvim_tweet_per_page = 60
-
-augroup TweetVimSetting
-  autocmd!
-  " マッピング
-  "     " 挿入・通常モードでsayバッファを閉じる
-  autocmd FileType tweetvim_say nnoremap <buffer><silent><C-g>         :<C-u>q!<CR>
-  autocmd FileType tweetvim_say inoremap <buffer><silent><C-g><C-o>    :<C-u>q!<CR><Esc>
-  " 各種アクション
-  autocmd FileType tweetvim     nnoremap <buffer>s                :<C-u>TweetVimSay<CR>
-  autocmd FileType tweetvim     nnoremap <buffer>m                :<C-u>TweetVimMentions<CR>
-  autocmd FileType tweetvim     nmap     <buffer>c                <Plug>(tweetvim_action_in_reply_to)
-  autocmd FileType tweetvim     nnoremap <buffer>t                :<C-u>Unite tweetvim -no-start-insert -quick-match<CR>
-  autocmd FileType tweetvim     nmap     <buffer><Leader>F        <Plug>(tweetvim_action_remove_favorite)
-  autocmd FileType tweetvim nmap <buffer><Leader>d <Plug>(tweetvim_action_remove_status)
-  " リロード
-  autocmd FileType tweetvim nmap <buffer><Tab> <Plug>(tweetvim_action_reload)
-  " ページの先頭に戻ったらリロード
-  autocmd FileType tweetvim nmap <buffer><silent>gg gg<Plug>(tweetvim_action_reload)
-  " ページ移動をff/bb からf/bに
-  autocmd FileType tweetvim     nmap     <buffer>f                <Plug>(tweetvim_action_page_next)
-  autocmd FileType tweetvim nmap <buffer>b <Plug>(tweetvim_action_page_previous)
-  " favstarやweb UIで表示
-  autocmd FileType tweetvim nnoremap <buffer><Leader><Leader> :<C-u>call <SID>tweetvim_favstar()<CR>
-  " ブラウザで対象ユーザーのホームを開く
-  autocmd FileType tweetvim nnoremap <buffer><Leader>u :<C-u>call <SID>tweetvim_open_home()<CR>
-  " 不要なマップを除去
-  autocmd FileType tweetvim     nunmap   <buffer>ff
-  autocmd FileType tweetvim nunmap <buffer>bb
-augroup END
-
-syntax enable
-set number
-set ruler
-set incsearch
-set hlsearch
-set nowrap
-set showmatch
-set whichwrap=h,l
-set nowrapscan
-set ignorecase
-set smartcase
-set hidden
-set history=2000
-set autoindent
-set expandtab
-set tabstop=2
-set shiftwidth=2
-set helplang=en
-set backspace=indent,eol,start
-nnoremap ;  :
-nnoremap :  ;
-vnoremap ;  :
-vnoremap :  ;
-noremap!  
-"" 消去、編集
-imap <C-k> <ESC>d$i
-imap <C-y> <ESC>pi
-imap <C-d> <ESC>xi
-"" 移動
+let &tabline = '%!'. s:SID_PREFIX() . 'my_tabline()'
+set showtabline=2 " 常にタブラインを表示
+nnoremap    [Tag]   <Nop>
+nmap    t [Tag]
+for n in range(1, 9)
+	execute 'nnoremap <silent> [Tag]'.n  ':<C-u>tabnext'.n.'<CR>'
+endfor
+"End of tab setting 上はわざとセミコロンとコロンを入れ替えている
+map <silent> [Tag]c ;tablast <bar> tabnew<CR>
+map <silent> [Tag]x ;tabclose<CR>
+map <silent> [Tag]l ;tabnext<CR>
+map <silent> [Tag]h ;tabprevious<CR>
 noremap <Space>h ^
 noremap <Space>l $
 
+"
+filetype plugin indent off
+
+" 行末、行頭の移動をlinuxと同じコマンドにする
+nnoremap <C-a> 0
+inoremap <C-a> <Esc>0<Insert>
+nnoremap <C-e> <C-$>
+inoremap <C-e> <Esc><C-$><Insert>
 imap <C-a>  <Home>
 imap <C-e>  <End>
 imap <C-b>  <Left>
 imap <C-f>  <Right>
 imap <C-n>  <Down>
 imap <C-p>  <UP>
+"カーソルから行末まで削除
+nnoremap <C-k> d$
+inoremap <C-k> <Esc>d$<Insert>
+"コロンセミコロンの入れ替え
+nnoremap ; :
+nnoremap : ;
+set nocompatible
+set fileencodings=ucs-bom,utf-8,iso-2022-jp,sjis,cp932,euc-jp,cp20932
+" 画面表示の設定
 
-" 空白文字の表示
-set list
-set listchars=tab:>.,trail:_,extends:>,precedes:<,nbsp:%
+set number         " 行番号を表示する
+"set cursorline     " カーソル行の背景色を変える
+"set cursorcolumn   " カーソル位置のカラムの背景色を変える
+set laststatus=2   " ステータス行を常に表示
+set cmdheight=2    " メッセージ表示欄を2行確保
+"set showmatch      " 対応する括弧を強調表示
+"showmatchがあまりにもハイライトされ、どちらにカーソルがいってるかわからないためコメントアウトで下を利用
+let loaded_matchparen = 1
+set helpheight=999 " ヘルプを画面いっぱいに開く
+set list           " 不可視文字を表示
+" 不可視文字の表示記号指定
+set listchars=tab:>-,eol:↲,extends:❯,precedes:❮
+set statusline=%<[%n]%m%r%h%w%{'['.(&fenc!=''?&fenc:&enc).':'.&ff.']'}%y\ %F%=%l,%c%V%8P
+" カーソル移動関連の設定
 
+set backspace=indent,eol,start " Backspaceキーの影響範囲に制限を設けない
 set whichwrap=b,s,h,l,<,>,[,]  " 行頭行末の左右移動で行をまたぐ
 set scrolloff=8                " 上下8行の視界を確保
 set sidescrolloff=16           " 左右スクロール時の視界を確保
 set sidescroll=1               " 左右スクロールは一文字づつ行う
+
+" ファイル処理関連の設定
+
+set confirm    " 保存されていないファイルがあるときは終了前に保存確認
+set hidden     " 保存されていないファイルがあるときでも別のファイルを開くことが出来る
+set autoread   "外部でファイルに変更がされた場合は読みなおす
+set nobackup   " ファイル保存時にバックアップファイルを作らない
+set noswapfile " ファイル編集中にスワップファイルを作らない
+
+" 検索/置換の設定
+
+set hlsearch   " 検索文字列をハイライトする
+set incsearch  " インクリメンタルサーチを行う
+set ignorecase " 大文字と小文字を区別しない
+set smartcase  " 大文字と小文字が混在した言葉で検索を行った場合に限り、大文字と小文字を区別する
+set wrapscan   " 最後尾まで検索を終えたら次の検索で先頭に移る
+set gdefault   " 置換の時 g オプションをデフォルトで有効にする
+
+" タブ/インデントの設定
+
+set expandtab     " タブ入力を複数の空白入力に置き換える
+set tabstop=2     " 画面上でタブ文字が占める幅
+set shiftwidth=2  " 自動インデントでずれる幅
+set softtabstop=2 " 連続した空白に対してタブキーやバックスペースキーでカーソルが動く幅
+set autoindent    " 改行時に前の行のインデントを継続する
+set smartindent   " 改行時に入力された行の末尾に合わせて次の行のインデントを増減する
+set noeol   "最終行に改行をいれない
+
+" OSのクリップボードをレジスタ指定無しで Yank, Put 出来るようにする
+set clipboard=unnamed,unnamedplus
+"↓マウスからのコピーを有効にするために外した
+set mouse=v
+" Windows でもパスの区切り文字を / にする
+set shellslash
+" インサートモードから抜けると自動的にIMEをオフにする
+" set iminsert=2 " コメントアウト for mac
+" コマンドラインモードでTABキーによるファイル名補完を有効にする
+set wildmenu wildmode=list:longest,full
+" コマンドラインの履歴を10000件保存する
+set history=10000
+"ビープ音すべてを無効にする
+set visualbell t_vb=
+set noerrorbells
+
+"拡張子ごとのタブなどの設定
+" filetype プラグインによる indent を on にする
+filetype plugin indent on
+
+" vim のマウス操作
+if has('mouse')
+    set mouse=a
+    if has('mouse_sgr')
+        set ttymouse=sgr
+    elseif v:version > 703 || v:version is 703 && has('patch632')
+        set ttymouse=sgr
+    else
+        set ttymouse=xterm2
+    endif
+endif
+
+""""""""""""""""""""""""""""""""
+" vim の基本的な設定 おわり
+""""""""""""""""""""""""""""""""
+
+""""""""""""""""""""""""""""""""
+" 基本的なNeoBundle はじめ
+""""""""""""""""""""""""""""""""
+" neobundle.vim
+if has('vim_starting')
+    set runtimepath+=~/.vim/bundle/neobundle.vim/
+    call neobundle#begin(expand('~/.vim/bundle/'))
+    NeoBundleFetch 'Shougo/neobundle.vim'
+    call neobundle#end()
+endif
+
+" NeoBundle はじめ
+call neobundle#begin(expand('~/.vim/bundle/'))
+NeoBundle 'Shougo/neobundle.vim'
+NeoBundle 'Shougo/unite.vim'
+NeoBundle 'https://github.com/thinca/vim-quickrun.git'
+NeoBundle "ctrlpvim/ctrlp.vim"
+set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*.jpg,*.png
+let g:ctrlp_custom_ignore = '\v[\/](node_modules|build)$'
+NeoBundle 'vim-scripts/robokai'
+
+" インデントの可視化
+NeoBundle 'Yggdroot/indentLine'
+
+" color schema
+NeoBundle 'tomasr/molokai'
+let g:molokai_original = 1
+filetype plugin on
+colorscheme molokai
+set t_Co=256
+syntax on
+let g:molokai_original = 1
+set background=dark
+
+" ファイル開くのをツリー型に
+NeoBundle 'scrooloose/nerdtree'
+
+" Git, Ggrep が使える
+NeoBundle 'tpope/vim-fugitive'
+" grep検索の実行後にQuickFix Listを表示する
+autocmd QuickFixCmdPost *grep* cwindow
+" ステータス行に現在のgitブランチを表示する
+set statusline+=%{fugitive#statusline()}
+"
+
+" 複数行のコメントアウト
+" visual 選択後に ctrl - -
+NeoBundle 'tomtom/tcomment_vim'
+
+" endwise
+" def や end を補完
+NeoBundleLazy 'tpope/vim-endwise', {'autoload' : { 'insert' : 1,}}
+
+" vim-autoclose
+" 括弧を補完
+NeoBundle 'Townk/vim-autoclose'
+
+" Yankround
+" コピペを使いまわせる
+NeoBundle 'LeafCage/yankround.vim'
+" yankround.vim {{{
+nmap p <Plug>(yankround-p)
+nmap P <Plug>(yankround-P)
+nmap <C-p> <Plug>(yankround-prev)
+nmap <C-n> <Plug>(yankround-next)
+let g:yankround_max_history = 100
+nnoremap <Leader><C-p> :<C-u>Unite yankround<CR>
+"}}}
+
+"" matchit
+""なんか動いてない気がするので一旦コメントアウト
+":source $VIMRUNTIMEmacros/matchit.vim
+
+" neocomplete・neosnippet
+NeoBundle 'Shougo/neocomplete.vim'
+NeoBundle "Shougo/neosnippet"
+" スニペット集
+NeoBundle 'Shougo/neosnippet-snippets'
+"Note: This option must be set in .vimrc(_vimrc).  NOT IN .gvimrc(_gvimrc)!
+" Disable AutoComplPop.
+let g:acp_enableAtStartup = 0
+" Use neocomplete.
+let g:neocomplete#enable_at_startup = 1
+" Use smartcase.
+let g:neocomplete#enable_smart_case = 1
+" Set minimum syntax keyword length.
+let g:neocomplete#sources#syntax#min_keyword_length = 3
+
+" Define dictionary.
+let g:neocomplete#sources#dictionary#dictionaries = {
+    \ 'default' : '',
+    \ 'vimshell' : $HOME.'/.vimshell_hist',
+    \ 'scheme' : $HOME.'/.gosh_completions'
+        \ }
+
+" Define keyword.
+if !exists('g:neocomplete#keyword_patterns')
+    let g:neocomplete#keyword_patterns = {}
+endif
+let g:neocomplete#keyword_patterns['default'] = '\h\w*'
+
+" Plugin key-mappings.
+inoremap <expr><C-g>     neocomplete#undo_completion()
+inoremap <expr><C-l>     neocomplete#complete_common_string()
+
+" Recommended key-mappings.
+" <CR>: close popup and save indent.
+inoremap <silent> <CR> <C-r>=<SID>my_cr_function()<CR>
+function! s:my_cr_function()
+  return (pumvisible() ? "\<C-y>" : "" ) . "\<CR>"
+  " For no inserting <CR> key.
+  "return pumvisible() ? "\<C-y>" : "\<CR>"
+endfunction
+" <TAB>: completion.
+inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
+" <C-h>, <BS>: close popup and delete backword char.
+inoremap <expr><C-h> neocomplete#smart_close_popup()."\<C-h>"
+inoremap <expr><BS> neocomplete#smart_close_popup()."\<C-h>"
+" Close popup by <Space>.
+"inoremap <expr><Space> pumvisible() ? "\<C-y>" : "\<Space>"
+
+" AutoComplPop like behavior.
+"let g:neocomplete#enable_auto_select = 1
+
+" Shell like behavior(not recommended).
+"set completeopt+=longest
+"let g:neocomplete#enable_auto_select = 1
+"let g:neocomplete#disable_auto_complete = 1
+"inoremap <expr><TAB>  pumvisible() ? "\<Down>" : "\<C-x>\<C-u>"
+
+" Enable omni completion.
+autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
+autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
+autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
+autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
+autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
+
+" Enable heavy omni completion.
+if !exists('g:neocomplete#sources#omni#input_patterns')
+  let g:neocomplete#sources#omni#input_patterns = {}
+endif
+"let g:neocomplete#sources#omni#input_patterns.php = '[^. \t]->\h\w*\|\h\w*::'
+"let g:neocomplete#sources#omni#input_patterns.c = '[^.[:digit:] *\t]\%(\.\|->\)'
+"let g:neocomplete#sources#omni#input_patterns.cpp = '[^.[:digit:] *\t]\%(\.\|->\)\|\h\w*::'
+
+" For perlomni.vim setting.
+" https://github.com/c9s/perlomni.vim
+let g:neocomplete#sources#omni#input_patterns.perl = '\h\w*->\h\w*\|\h\w*::'
+
+" Plugin key-mappings.
+" Note: It must be "imap" and "smap".  It uses <Plug> mappings.
+imap <C-k>     <Plug>(neosnippet_expand_or_jump)
+smap <C-k>     <Plug>(neosnippet_expand_or_jump)
+xmap <C-k>     <Plug>(neosnippet_expand_target)
+
+" SuperTab like snippets behavior.
+" Note: It must be "imap" and "smap".  It uses <Plug> mappings.
+imap <C-k>     <Plug>(neosnippet_expand_or_jump)
+"imap <expr><TAB>
+" \ pumvisible() ? "\<C-n>" :
+" \ neosnippet#expandable_or_jumpable() ?
+" \    "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
+smap <expr><TAB> neosnippet#expandable_or_jumpable() ?
+\ "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
+
+" For conceal markers.
+if has('conceal')
+  set conceallevel=2 concealcursor=niv
+endif
+
+
+
+
+
+
+
+""""""""""""""""""""""""""""""""
+" 基本的なNeoBundle おわり
+""""""""""""""""""""""""""""""""
+"
+""""""""""""""""""""""""""""""""
+" 基本的な Linter の設定はじめ
+""""""""""""""""""""""""""""""""
+" Rubocop
+" gem install rubocop
+NeoBundle 'scrooloose/syntastic'
+"NeoBundle 'pmsorhaindo/syntastic-local-eslint.vim'
+let g:syntastic_mode_map = { 'mode': 'active', 'active_filetypes': ['ruby'] }
+let g:syntastic_ruby_checkers = ['rubocop']
+
+let g:syntastic_javascript_checkers = ['eslint']
+let g:syntastic_javascript_eslint_exec = 'eslint_d'
+
+
+" ここから下は Syntastic のおすすめの設定
+" ref. https://github.com/scrooloose/syntastic#settings
+
+" エラー行に sign を表示
+let g:syntastic_enable_signs = 1
+" location list を常に更新
+let g:syntastic_always_populate_loc_list = 0
+" location list を常に表示
+let g:syntastic_auto_loc_list = 0
+" ファイルを開いた時にチェックを実行する
+let g:syntastic_check_on_open = 1
+" :wq で終了する時もチェックする
+let g:syntastic_check_on_wq = 0
+
+""""""""""""""""""""""""""""""""
+" 基本的な Linter の設定おわり
+""""""""""""""""""""""""""""""""
+
+""""""""""""""""""""""""""""""
+" Ruby や ROR のための設定はじめ
+""""""""""""""""""""""""""""""
+"" vim-rails
+autocmd User Rails.view*                 NeoSnippetSource ~/.vim/snippet/ruby.rails.view.snip
+autocmd User Rails.controller*           NeoSnippetSource ~/.vim/snippet/ruby.rails.controller.snip
+autocmd User Rails/db/migrate/*          NeoSnippetSource ~/.vim/snippet/ruby.rails.migrate.snip
+autocmd User Rails/config/routes.rb      NeoSnippetSource ~/.vim/snippet/ruby.rails.route.snip
+""""""""""""""""""""""""""""""
+" Ruby や ROR のための設定おわり
+""""""""""""""""""""""""""""""
+
+
+""""""""""""""""""""""""""""""
+" JS のための設定はじめ
+""""""""""""""""""""""""""""""
+"react native
+NeoBundle 'pangloss/vim-javascript'
+NeoBundle 'mxw/vim-jsx'
+let g:jsx_ext_required = 0
+
+"" tern (react)
+NeoBundle 'marijnh/tern_for_vim', {
+  \ 'build': {
+  \   'others': 'npm install'
+  \}}
+""""""""""""""""""""""""""""""
+" JS のための設定おわり
+""""""""""""""""""""""""""""""
+
+
+" NeoBundle おわり
+call neobundle#end()
