@@ -58,15 +58,29 @@ inoremap <C-e> <Esc><C-$><Insert>
 nnoremap <C-k> d$
 inoremap <C-k> <Esc>d$<Insert>
 """ 移動
+=======
 noremap <Space>h ^
 noremap <Space>l $
 
+"
+filetype plugin indent off
+
+" 行末、行頭の移動をlinuxと同じコマンドにする
+nnoremap <C-a> 0
+inoremap <C-a> <Esc>0<Insert>
+nnoremap <C-e> <C-$>
+inoremap <C-e> <Esc><C-$><Insert>
 imap <C-a>  <Home>
 imap <C-e>  <End>
 imap <C-b>  <Left>
 imap <C-f>  <Right>
 imap <C-n>  <Down>
 imap <C-p>  <UP>
+<<<<<<< HEAD
+=======
+"カーソルから行末まで削除
+nnoremap <C-k> d$
+inoremap <C-k> <Esc>d$<Insert>
 "コロンセミコロンの入れ替え
 nnoremap ; :
 nnoremap : ;
@@ -350,7 +364,6 @@ let g:syntastic_mode_map = { 'mode': 'active', 'active_filetypes': ['ruby'] }
 
 "let g:syntastic_javascript_checkers = ['eslint']
 "let g:syntastic_javascript_eslint_exec = 'eslint_d'
-
 
 " ここから下は Syntastic のおすすめの設定
 " ref. https://github.com/scrooloose/syntastic#settings
