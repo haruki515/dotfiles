@@ -189,6 +189,8 @@ NeoBundle 'tomasr/molokai'
 
 " ファイル開くのをツリー型に
 NeoBundle 'scrooloose/nerdtree'
+nnoremap <silent> <C-n><C-n> :NERDTreeToggle<CR>
+nnoremap <silent> <C-m><C-m> :NERDTreeToggle<CR>
 
 " Git, Ggrep が使える
 NeoBundle 'tpope/vim-fugitive'
@@ -300,7 +302,7 @@ endif
 
 " For perlomni.vim setting.
 " https://github.com/c9s/perlomni.vim
-let g:neocomplete#sources#omni#input_patterns.perl = '\h\w*->\h\w*\|\h\w*::'
+" let g:neocomplete#sources#omni#input_patterns.perl = '\h\w*->\h\w*\|\h\w*::'
 
 " Plugin key-mappings.
 " Note: It must be "imap" and "smap".  It uses <Plug> mappings.
@@ -323,6 +325,7 @@ if has('conceal')
   set conceallevel=2 concealcursor=niv
 endif
 
+" https://blog.monochromegane.com/blog/2013/09/18/ag-and-unite/
 NeoBundle 'rking/ag.vim'
 NeoBundle 'Shougo/vimproc.vim'
  " insert modeで開始
@@ -345,7 +348,7 @@ endif
 
 """"""""""""""""""""""""""""""""
 " 基本的なNeoBundle おわり
-""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""
 "
 """"""""""""""""""""""""""""""""
 " 基本的な Linter の設定はじめ
@@ -384,6 +387,37 @@ let g:syntastic_check_on_wq = 0
 " Ruby や ROR のための設定はじめ
 """"""""""""""""""""""""""""""
 "" vim-rails
+" https://github.com/tpope/vim-rails
+NeoBundle 'tpope/vim-rails.git'
+""{{{
+"有効化
+let g:rails_default_file='config/database.yml'
+let g:rails_level = 4
+let g:rails_mappings=1
+let g:rails_modelines=0
+" let g:rails_some_option = 1
+" let g:rails_statusline = 1
+" let g:rails_subversion=0
+" let g:rails_syntax = 1
+" let g:rails_url='http://localhost:3000'
+" let g:rails_ctags_arguments='--languages=-javascript'
+" let g:rails_ctags_arguments = ''
+function! SetUpRailsSetting()
+  nnoremap <buffer><Space>r :R<CR>
+  nnoremap <buffer><Space>a :A<CR>
+  nnoremap <buffer><Space>m :Rmodel<Space>
+  nnoremap <buffer><Space>c :Rcontroller<Space>
+  nnoremap <buffer><Space>v :Rview<Space>
+endfunction
+ 
+aug MyAutoCmd
+  au User Rails call SetUpRailsSetting()
+aug END
+ 
+aug RailsDictSetting
+  au!
+aug END
+"}}}
 autocmd User Rails.view*                 NeoSnippetSource ~/.vim/snippet/ruby.rails.view.snip
 autocmd User Rails.controller*           NeoSnippetSource ~/.vim/snippet/ruby.rails.controller.snip
 autocmd User Rails/db/migrate/*          NeoSnippetSource ~/.vim/snippet/ruby.rails.migrate.snip
