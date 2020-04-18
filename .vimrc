@@ -40,12 +40,9 @@ map <silent> [Tag]c ;tablast <bar> tabnew<CR>
 map <silent> [Tag]x ;tabclose<CR>
 map <silent> [Tag]l ;tabnext<CR>
 map <silent> [Tag]h ;tabprevious<CR>
+noremap <Space>h ^
+noremap <Space>l $
 
-" Golang
-let g:go_bin_path = $GOPATH.'/bin'
-set rtp+=$GOPATH/misc/vim
-exe "set rtp+=".globpath($GOPATH, "src/github.com/nsf/gocode/vim")
-set completeopt=menu,preview
 "
 filetype plugin indent off
 
@@ -54,19 +51,15 @@ nnoremap <C-a> 0
 inoremap <C-a> <Esc>0<Insert>
 nnoremap <C-e> <C-$>
 inoremap <C-e> <Esc><C-$><Insert>
-"カーソルから行末まで削除
-nnoremap <C-k> d$
-inoremap <C-k> <Esc>d$<Insert>
-""" 移動
-noremap <Space>h ^
-noremap <Space>l $
-
 imap <C-a>  <Home>
 imap <C-e>  <End>
 imap <C-b>  <Left>
 imap <C-f>  <Right>
 imap <C-n>  <Down>
 imap <C-p>  <UP>
+"カーソルから行末まで削除
+nnoremap <C-k> d$
+inoremap <C-k> <Esc>d$<Insert>
 "コロンセミコロンの入れ替え
 nnoremap ; :
 nnoremap : ;
@@ -176,7 +169,8 @@ NeoBundle 'Shougo/unite.vim'
 NeoBundle 'https://github.com/thinca/vim-quickrun.git'
 NeoBundle "ctrlpvim/ctrlp.vim"
 set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*.jpg,*.png
-let g:ctrlp_custom_ignore = '\v[\/](node_modules|build)$'
+let g:ctrlp_custom_ignore = '\v[\/](node_modules|build|local)$'
+let g:ctrlp_user_command = ['.git', 'cd %s && git ls-files -co --exclude-standard']
 NeoBundle 'vim-scripts/robokai'
 
 " インデントの可視化
@@ -184,13 +178,14 @@ NeoBundle 'Yggdroot/indentLine'
 
 " color schema
 NeoBundle 'tomasr/molokai'
-let g:molokai_original = 1
-filetype plugin on
-colorscheme molokai
-set t_Co=256
-syntax on
-let g:molokai_original = 1
-set background=dark
+" let g:molokai_original = 1
+ filetype plugin on
+ colorscheme molokai
+" set t_Co=256
+ syntax on
+ set synmaxcol=200
+" let g:molokai_original = 1
+" set background=dark
 
 " ファイル開くのをツリー型に
 NeoBundle 'scrooloose/nerdtree'
@@ -309,13 +304,13 @@ let g:neocomplete#sources#omni#input_patterns.perl = '\h\w*->\h\w*\|\h\w*::'
 
 " Plugin key-mappings.
 " Note: It must be "imap" and "smap".  It uses <Plug> mappings.
-imap <C-l>     <Plug>(neosnippet_expand_or_jump)
-smap <C-l>     <Plug>(neosnippet_expand_or_jump)
-xmap <C-l>     <Plug>(neosnippet_expand_target)
+imap <C-k>     <Plug>(neosnippet_expand_or_jump)
+smap <C-k>     <Plug>(neosnippet_expand_or_jump)
+xmap <C-k>     <Plug>(neosnippet_expand_target)
 
 " SuperTab like snippets behavior.
 " Note: It must be "imap" and "smap".  It uses <Plug> mappings.
-imap <C-l>     <Plug>(neosnippet_expand_or_jump)
+imap <C-k>     <Plug>(neosnippet_expand_or_jump)
 "imap <expr><TAB>
 " \ pumvisible() ? "\<C-n>" :
 " \ neosnippet#expandable_or_jumpable() ?
@@ -328,10 +323,24 @@ if has('conceal')
   set conceallevel=2 concealcursor=niv
 endif
 
-
-
-
-
+NeoBundle 'rking/ag.vim'
+NeoBundle 'Shougo/vimproc.vim'
+ " insert modeで開始
+let g:unite_enable_start_insert = 1
+ " 大文字小文字を区別しない
+let g:unite_enable_ignore_case = 1
+let g:unite_enable_smart_case = 1
+ " grep検索
+nnoremap <silent> <C-c><C-c>  :<C-u>Unite grep:. -buffer-name=search-buffer<CR>
+ " カーソル位置の単語をgrep検索
+nnoremap <silent> <C-f><C-f> :<C-u>Unite grep:. -default-action=tabopen -buffer-name=search-buffer<CR><C-R><C-W>
+ " grep検索結果の再呼出
+nnoremap <silent> ,r  :<C-u>UniteResume search-buffer<CR>
+ if executable('ag')
+  let g:unite_source_grep_command = 'ag'
+  let g:unite_source_grep_default_opts = '--nogroup --nocolor --column'
+  let g:unite_source_grep_recursive_opt = ''
+endif
 
 
 """"""""""""""""""""""""""""""""
@@ -346,11 +355,12 @@ endif
 NeoBundle 'scrooloose/syntastic'
 NeoBundle 'pmsorhaindo/syntastic-local-eslint.vim'
 let g:syntastic_mode_map = { 'mode': 'active', 'active_filetypes': ['ruby'] }
-"let g:syntastic_ruby_checkers = ['rubocop']
+let g:syntastic_ruby_checkers = ['rubocop']
 
-"let g:syntastic_javascript_checkers = ['eslint']
-"let g:syntastic_javascript_eslint_exec = 'eslint_d'
-
+let g:syntastic_javascript_checkers = ['eslint']
+let g:syntastic_javascript_eslint_exec = 'eslint_d'
+" let g:syntastic_enable_perl_checker = 1
+" let g:syntastic_perl_checkers = ['perl', 'podchecker']
 
 " ここから下は Syntastic のおすすめの設定
 " ref. https://github.com/scrooloose/syntastic#settings
@@ -391,9 +401,6 @@ NeoBundle 'pangloss/vim-javascript'
 NeoBundle 'mxw/vim-jsx'
 let g:jsx_ext_required = 0
 
-
-" Golang
-NeoBundle 'fatih/vim-go'
 "" tern (react)
 NeoBundle 'marijnh/tern_for_vim', {
   \ 'build': {
@@ -402,7 +409,9 @@ NeoBundle 'marijnh/tern_for_vim', {
 """"""""""""""""""""""""""""""
 " JS のための設定おわり
 """"""""""""""""""""""""""""""
-
+" NeoBundle 'vim-perl/vim-perl'
 
 " NeoBundle おわり
 call neobundle#end()
+set tags=.tags
+nnoremap <c-i><c-i> :tab tag <c-r><c-w><cr>
